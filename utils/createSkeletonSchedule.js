@@ -9,8 +9,8 @@ function createSkeletonSchedule(year, month) {
     let shifts;
     if (weekday === 5 || weekday === 6) {
       shifts = [
-        { shiftName: "1st Shift (8 AM - 8 PM)", roles: createEmptyRoles() },
-        { shiftName: "2nd Shift (8 PM - 8 AM)", roles: createEmptyRoles() },
+        { shiftName: "B-Shift (8 AM - 8 PM)", roles: createEmptyRoles() },
+        { shiftName: "С-Shift (8 PM - 8 AM)", roles: createEmptyRoles() },
       ];
     } else {
       shifts = [
