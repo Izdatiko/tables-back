@@ -3,11 +3,56 @@ const router = express.Router();
 const User = require("../models/User");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth");
 
+const validateDayOffs = (dayOffs, dayOffsCount) => {
+  const monthYearMap = new Map();
+
+  dayOffs.forEach((item) => {
+    const parsedDate = new Date(item.date);
+    if (isNaN(parsedDate)) {
+      throw new Error(`Invalid date format: ${item.date}`);
+    }
+
+    const formattedDate = parsedDate.toISOString().split("T")[0]; // Формат YYYY-MM-DD
+    const monthYear = `${parsedDate.getFullYear()}-${parsedDate.getMonth()}`;
+
+    if (!monthYearMap.has(monthYear)) {
+      monthYearMap.set(monthYear, new Set());
+    }
+
+    const daysInMonth = monthYearMap.get(monthYear);
+
+    if (daysInMonth.has(formattedDate)) {
+      throw new Error(`Duplicate date found: ${formattedDate}`);
+    }
+
+    daysInMonth.add(formattedDate);
+
+    if (daysInMonth.size > dayOffsCount) {
+      throw new Error(
+        `User cannot have more than ${dayOffsCount} day-offs in a month (${monthYear})`
+      );
+    }
+  });
+
+  return dayOffs.map((item) => ({ date: new Date(item.date) }));
+};
+
 // Создание пользователя — доступно только админам
-router.post("/", isAdmin, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { username, password, role, level } = req.body;
-    const newUser = new User({ username, password, role, level });
+    const { username, password, role, level, dayOffs, dayOffsCount } = req.body;
+
+    const formattedDayOffs = validateDayOffs(dayOffs || [], dayOffsCount || 1);
+
+    // Создание пользователя
+    const newUser = new User({
+      username,
+      password,
+      role,
+      level,
+      dayOffs: formattedDayOffs,
+    });
+
     await newUser.save();
     res.status(201).json(newUser);
   } catch (error) {

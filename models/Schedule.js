@@ -1,4 +1,3 @@
-// models/Schedule.js
 const mongoose = require("mongoose");
 
 const RoleSchema = new mongoose.Schema({
@@ -10,18 +9,13 @@ const RoleSchema = new mongoose.Schema({
 const ShiftSchema = new mongoose.Schema({
   shiftName: { type: String, required: true }, // B-Shift, C-Shift, 1st Shift, 2nd Shift
   roles: [RoleSchema],
+  points: { type: Number, default: 0 },
 });
 
 const DaySchema = new mongoose.Schema({
-  date: { type: Number, required: true },
-  weekday: { type: Number },
+  date: { type: Date, required: true }, // Полный объект даты
+  weekday: { type: Number }, // День недели
   shifts: [ShiftSchema],
 });
 
-const ScheduleSchema = new mongoose.Schema({
-  year: { type: Number, required: true },
-  month: { type: Number, required: true },
-  days: [DaySchema],
-});
-
-module.exports = mongoose.model("Schedule", ScheduleSchema);
+module.exports = mongoose.model("DaySchedule", DaySchema);
